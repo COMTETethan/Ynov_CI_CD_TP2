@@ -1,3 +1,54 @@
+// B1 : calculateOrderTotal
+/**
+ * Calcule le total de la commande avec tous les paramètres.
+ * @param {Array} items - [{ name, price, quantity }]
+ * @param {number} distance
+ * @param {number} weight
+ * @param {string|null} promoCode
+ * @param {number} hour
+ * @param {number} dayOfWeek
+ * @param {Array} [promoCodes] - Optionnel, pour tests
+ * @returns {object} { subtotal, discount, deliveryFee, surge, total }
+ */
+export function calculateOrderTotal(items, distance, weight, promoCode, hour, dayOfWeek, promoCodes) {
+  if (!Array.isArray(items) || items.length === 0) throw new Error('Empty cart');
+  // 1. Calculer le sous-total
+  let subtotal = 0;
+  for (const item of items) {
+    if (!item || typeof item.price !== 'number' || typeof item.quantity !== 'number') throw new Error('Invalid item');
+    if (item.price < 0) throw new Error('Negative price');
+    if (item.quantity < 0) throw new Error('Negative quantity');
+    if (item.quantity === 0) continue;
+    subtotal += item.price * item.quantity;
+  }
+  subtotal = Math.round(subtotal * 100) / 100;
+  // 2. Appliquer le code promo
+  let discount = 0;
+  let subtotalAfterDiscount = subtotal;
+  if (promoCode) {
+    if (!promoCodes) throw new Error('promoCodes required');
+    const after = applyPromoCode(subtotal, promoCode, promoCodes);
+    if (after === null) throw new Error('Promo refused');
+    discount = Math.round((subtotal - after) * 100) / 100;
+    subtotalAfterDiscount = after;
+  }
+  // 3. Calculer les frais de livraison
+  const deliveryFee = calculateDeliveryFee(distance, weight);
+  if (deliveryFee === null) throw new Error('Delivery not available');
+  // 4. Appliquer le multiplicateur surge
+  const surge = calculateSurge(hour, dayOfWeek);
+  if (surge === 0) throw new Error('Closed');
+  const deliveryWithSurge = Math.round((deliveryFee * surge) * 100) / 100;
+  // 5. Total
+  const total = Math.round((subtotalAfterDiscount + deliveryWithSurge) * 100) / 100;
+  return {
+    subtotal,
+    discount,
+    deliveryFee: deliveryWithSurge,
+    surge,
+    total
+  };
+}
 // B1 : calculateSurge
 /**
  * Calcule le multiplicateur de prix selon l'heure et le jour.

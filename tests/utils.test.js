@@ -1,3 +1,120 @@
+describe('calculateOrderTotal', () => {
+  const promoCodes = [
+    { code: 'PROMO20', type: 'percentage', value: 20, minOrder: 15.00, expiresAt: '2026-12-31' },
+    { code: 'FIXE5', type: 'fixed', value: 5, minOrder: 10.00, expiresAt: '2026-12-31' },
+  ];
+  const items = [
+    { name: 'Pizza', price: 12.5, quantity: 2 },
+    { name: 'Soda', price: 3, quantity: 1 }
+  ];
+
+  // Scénario complet
+  it('2 pizzas à 12.50€ + 5km + mardi 15h', () => {
+    const res = calculateOrderTotal([
+      { name: 'Pizza', price: 12.5, quantity: 2 }
+    ], 5, 1, null, 15, 2, promoCodes);
+    expect(res.subtotal).toBe(25);
+    expect(res.discount).toBe(0);
+    expect(res.surge).toBe(1.0);
+    expect(res.deliveryFee).toBe(3);
+    expect(res.total).toBe(28);
+  });
+  it('Même commande avec code promo 20%', () => {
+    const res = calculateOrderTotal([
+      { name: 'Pizza', price: 12.5, quantity: 2 }
+    ], 5, 1, 'PROMO20', 15, 2, promoCodes);
+    expect(res.subtotal).toBe(25);
+    expect(res.discount).toBe(5);
+    expect(res.surge).toBe(1.0);
+    expect(res.deliveryFee).toBe(3);
+    expect(res.total).toBe(23);
+  });
+  it('Même commande vendredi 20h (surge 1.8)', () => {
+    const res = calculateOrderTotal([
+      { name: 'Pizza', price: 12.5, quantity: 2 }
+    ], 5, 1, null, 20, 5, promoCodes);
+    expect(res.subtotal).toBe(25);
+    expect(res.discount).toBe(0);
+    expect(res.surge).toBe(1.8);
+    expect(res.deliveryFee).toBe(5.4);
+    expect(res.total).toBe(30.4);
+  });
+  it('Vérifie que le surge ne s’applique qu’à la livraison', () => {
+    const res = calculateOrderTotal([
+      { name: 'Pizza', price: 10, quantity: 1 }
+    ], 3, 1, null, 20, 5, promoCodes);
+    // Livraison de base = 2€, surge 1.8 => 3.6
+    expect(res.deliveryFee).toBe(3.6);
+    expect(res.total).toBe(13.6);
+  });
+  it('Vérifie que subtotal + deliveryFee = total sans promo', () => {
+    const res = calculateOrderTotal([
+      { name: 'Pizza', price: 10, quantity: 1 }
+    ], 3, 1, null, 15, 2, promoCodes);
+    expect(res.total).toBe(res.subtotal + res.deliveryFee);
+  });
+  it('Vérifie que l’objet retourné contient toutes les clés', () => {
+    const res = calculateOrderTotal([
+      { name: 'Pizza', price: 10, quantity: 1 }
+    ], 3, 1, null, 15, 2, promoCodes);
+    expect(res).toHaveProperty('subtotal');
+    expect(res).toHaveProperty('discount');
+    expect(res).toHaveProperty('deliveryFee');
+    expect(res).toHaveProperty('surge');
+    expect(res).toHaveProperty('total');
+  });
+
+  // Cas qui cassent
+  it('Panier vide → erreur', () => {
+    expect(() => calculateOrderTotal([], 5, 1, null, 15, 2, promoCodes)).toThrow();
+  });
+  it('Item avec quantity = 0 → ignoré', () => {
+    const res = calculateOrderTotal([
+      { name: 'Pizza', price: 10, quantity: 0 },
+      { name: 'Soda', price: 3, quantity: 1 }
+    ], 3, 1, null, 15, 2, promoCodes);
+    expect(res.subtotal).toBe(3);
+    expect(res.total).toBe(5);
+  });
+  it('Item avec prix négatif → erreur', () => {
+    expect(() => calculateOrderTotal([
+      { name: 'Pizza', price: -10, quantity: 1 }
+    ], 3, 1, null, 15, 2, promoCodes)).toThrow();
+  });
+  it('Commande à 23h (fermé) → erreur', () => {
+    expect(() => calculateOrderTotal([
+      { name: 'Pizza', price: 10, quantity: 1 }
+    ], 3, 1, null, 23, 2, promoCodes)).toThrow();
+  });
+  it('Distance 15 km (hors zone) → erreur', () => {
+    expect(() => calculateOrderTotal([
+      { name: 'Pizza', price: 10, quantity: 1 }
+    ], 15, 1, null, 15, 2, promoCodes)).toThrow();
+  });
+  it('Promo refusée (minOrder non atteint) → erreur', () => {
+    expect(() => calculateOrderTotal([
+      { name: 'Pizza', price: 5, quantity: 1 }
+    ], 3, 1, 'PROMO20', 15, 2, promoCodes)).toThrow();
+  });
+  it('Promo inconnue → erreur', () => {
+    expect(() => calculateOrderTotal([
+      { name: 'Pizza', price: 10, quantity: 1 }
+    ], 3, 1, 'INCONNU', 15, 2, promoCodes)).toThrow();
+  });
+  it('Quantité négative → erreur', () => {
+    expect(() => calculateOrderTotal([
+      { name: 'Pizza', price: 10, quantity: -1 }
+    ], 3, 1, null, 15, 2, promoCodes)).toThrow();
+  });
+  it('Item sans price ou quantity → erreur', () => {
+    expect(() => calculateOrderTotal([
+      { name: 'Pizza', price: 10 }
+    ], 3, 1, null, 15, 2, promoCodes)).toThrow();
+    expect(() => calculateOrderTotal([
+      { name: 'Pizza', quantity: 1 }
+    ], 3, 1, null, 15, 2, promoCodes)).toThrow();
+  });
+});
 describe('calculateSurge', () => {
   it('Mardi 15h → 1.0 (normal)', () => {
     expect(calculateSurge(15, 2)).toBe(1.0); // mardi
@@ -382,7 +499,7 @@ describe('sortStudents', () => {
 });
 
 import { describe, it, expect } from 'vitest';
-import { capitalize, calculateAverage, slugify, clamp, sortStudents, parsePrice, groupBy, calculateDiscount, calculateDeliveryFee, applyPromoCode, calculateSurge } from '../src/utils.js';
+import { capitalize, calculateAverage, slugify, clamp, sortStudents, parsePrice, groupBy, calculateDiscount, calculateDeliveryFee, applyPromoCode, calculateSurge, calculateOrderTotal } from '../src/utils.js';
 
 describe('capitalize', () => {
   it('should handle undefined and numbers', () => {
