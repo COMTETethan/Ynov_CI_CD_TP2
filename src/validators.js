@@ -5,7 +5,7 @@
  * @param {string} email
  * @returns {boolean}
  */
-function isValidEmail(email) {
+export function isValidEmail(email) {
   if (typeof email !== 'string') return false;
   const parts = email.split('@');
   if (parts.length !== 2) return false;
@@ -18,7 +18,7 @@ function isValidEmail(email) {
  * @param {string} password
  * @returns {{ valid: boolean, errors: string[] }}
  */
-function isValidPassword(password) {
+export function isValidPassword(password) {
   const errors = [];
   if (typeof password !== 'string' || password.length < 8) errors.push('Le mot de passe doit contenir au moins 8 caractères');
   if (!/[A-Z]/.test(password)) errors.push('Le mot de passe doit contenir au moins une majuscule');
@@ -33,8 +33,6 @@ function isValidPassword(password) {
  * @param {any} age
  * @returns {boolean}
  */
-function isValidAge(age) {
+export function isValidAge(age) {
   return Number.isInteger(age) && age >= 0 && age <= 150;
 }
-
-module.exports = { isValidEmail, isValidPassword, isValidAge };

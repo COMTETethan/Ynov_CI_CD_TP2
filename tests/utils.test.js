@@ -1,5 +1,6 @@
-const { describe, it, expect } = require('vitest');
-const { capitalize, calculateAverage, slugify, clamp } = require('../src/utils');
+
+import { describe, it, expect } from 'vitest';
+import { capitalize, calculateAverage, slugify, clamp } from '../src/utils.js';
 
 describe('capitalize', () => {
   it('should capitalize first letter and lowercase the rest', () => {

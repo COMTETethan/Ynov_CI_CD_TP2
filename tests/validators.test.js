@@ -1,5 +1,6 @@
-const { describe, it, expect } = require('vitest');
-const { isValidEmail, isValidPassword, isValidAge } = require('../src/validators');
+
+import { describe, it, expect } from 'vitest';
+import { isValidEmail, isValidPassword, isValidAge } from '../src/validators.js';
 
 describe('isValidEmail', () => {
   it('should validate correct emails', () => {

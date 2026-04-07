@@ -5,7 +5,7 @@
  * @param {string} str
  * @returns {string}
  */
-function capitalize(str) {
+export function capitalize(str) {
   if (!str) return '';
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
@@ -15,7 +15,7 @@ function capitalize(str) {
  * @param {number[]} numbers
  * @returns {number}
  */
-function calculateAverage(numbers) {
+export function calculateAverage(numbers) {
   if (!Array.isArray(numbers) || numbers.length === 0) return 0;
   const sum = numbers.reduce((acc, n) => acc + n, 0);
   return Math.round((sum / numbers.length) * 100) / 100;
@@ -26,14 +26,15 @@ function calculateAverage(numbers) {
  * @param {string} text
  * @returns {string}
  */
-function slugify(text) {
+export function slugify(text) {
   if (!text) return '';
   return text
     .toLowerCase()
     .trim()
     .replace(/\s+/g, '-')
     .replace(/[^a-z0-9-]/g, '')
-    .replace(/-+/g, '-');
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 /**
@@ -43,8 +44,6 @@ function slugify(text) {
  * @param {number} max
  * @returns {number}
  */
-function clamp(value, min, max) {
+export function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
-
-module.exports = { capitalize, calculateAverage, slugify, clamp };
