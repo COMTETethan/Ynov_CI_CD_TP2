@@ -180,6 +180,10 @@ import { describe, it, expect } from 'vitest';
 import { capitalize, calculateAverage, slugify, clamp, sortStudents, parsePrice, groupBy, calculateDiscount } from '../src/utils.js';
 
 describe('capitalize', () => {
+  it('should handle undefined and numbers', () => {
+    expect(capitalize(undefined)).toBe('');
+    expect(capitalize(123)).toBe('');
+  });
   it('should capitalize first letter and lowercase the rest', () => {
     expect(capitalize('hello')).toBe('Hello');
     expect(capitalize('WORLD')).toBe('World');
@@ -191,6 +195,10 @@ describe('capitalize', () => {
 });
 
 describe('calculateAverage', () => {
+  it('should handle array with NaN or non-numbers', () => {
+    expect(calculateAverage([10, NaN, 20])).toBeCloseTo(15);
+    expect(calculateAverage(["a", 5, 15])).toBeCloseTo(10);
+  });
   it('should calculate average of numbers', () => {
     expect(calculateAverage([10, 12, 14])).toBe(12);
     expect(calculateAverage([15])).toBe(15);
@@ -203,6 +211,10 @@ describe('calculateAverage', () => {
 });
 
 describe('slugify', () => {
+    it('should handle special characters and multiple dashes', () => {
+      expect(slugify('Hello---World!!!')).toBe('hello-world');
+      expect(slugify('  --Hello  World--  ')).toBe('hello-world');
+    });
   it('should slugify text', () => {
     expect(slugify('Hello World')).toBe('hello-world');
     expect(slugify(' Spaces Everywhere ')).toBe('spaces-everywhere');
@@ -214,6 +226,43 @@ describe('slugify', () => {
 });
 
 describe('clamp', () => {
+    it('should handle NaN and undefined', () => {
+      expect(clamp(NaN, 0, 10)).toBe(0);
+      expect(clamp(undefined, 0, 10)).toBe(0);
+    });
+    it('should handle unknown sortBy', () => {
+      const students = [
+        { name: 'Alice', grade: 15, age: 20 },
+        { name: 'Bob', grade: 12, age: 22 },
+      ];
+      expect(sortStudents(students, 'unknown')).toEqual(students);
+    });
+    it('should handle undefined students', () => {
+      expect(sortStudents(undefined, 'grade')).toEqual([]);
+    });
+    it('should handle undefined and empty string', () => {
+      expect(parsePrice(undefined)).toBeNull();
+      expect(parsePrice('')).toBeNull();
+    });
+    it('should handle string with spaces', () => {
+      expect(parsePrice('   15,50   ')).toBe(15.5);
+    });
+    it('should handle undefined array', () => {
+      expect(groupBy(undefined, 'role')).toEqual({});
+    });
+    it('should handle undefined key', () => {
+      const arr = [ { name: 'Alice', role: 'dev' } ];
+      expect(groupBy(arr, undefined)).toEqual({});
+    });
+    it('should throw for negative price', () => {
+      expect(() => calculateDiscount(-10, [{ type: 'fixed', value: 5 }])).toThrow();
+    });
+    it('should throw for missing rule fields', () => {
+      expect(() => calculateDiscount(100, [{ type: 'buyXgetY', buy: 3 }])).toThrow();
+    });
+    it('should handle empty rules array', () => {
+      expect(calculateDiscount(100, [])).toBe(100);
+    });
   it('should clamp value between min and max', () => {
     expect(clamp(5, 0, 10)).toBe(5);
     expect(clamp(-5, 0, 10)).toBe(0);

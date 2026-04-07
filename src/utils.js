@@ -69,7 +69,7 @@ export function sortStudents(students, sortBy, order = 'asc') {
  * @returns {string}
  */
 export function capitalize(str) {
-  if (!str) return '';
+  if (typeof str !== 'string' || !str) return '';
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
@@ -80,8 +80,10 @@ export function capitalize(str) {
  */
 export function calculateAverage(numbers) {
   if (!Array.isArray(numbers) || numbers.length === 0) return 0;
-  const sum = numbers.reduce((acc, n) => acc + n, 0);
-  return Math.round((sum / numbers.length) * 100) / 100;
+  const valid = numbers.filter(n => typeof n === 'number' && !isNaN(n));
+  if (valid.length === 0) return 0;
+  const sum = valid.reduce((acc, n) => acc + n, 0);
+  return Math.round((sum / valid.length) * 100) / 100;
 }
 
 /**
@@ -108,5 +110,6 @@ export function slugify(text) {
  * @returns {number}
  */
 export function clamp(value, min, max) {
+  if (typeof value !== 'number' || isNaN(value)) return min;
   return Math.max(min, Math.min(max, value));
 }
