@@ -1,4 +1,17 @@
 describe('sortStudents', () => {
+                it('should default to ascending order', () => {
+                  const students = [
+                    { name: 'Alice', grade: 15, age: 20 },
+                    { name: 'Bob', grade: 12, age: 22 },
+                    { name: 'Charlie', grade: 18, age: 19 },
+                  ];
+                  const sorted = sortStudents(students, 'grade');
+                  expect(sorted).toEqual([
+                    { name: 'Bob', grade: 12, age: 22 },
+                    { name: 'Alice', grade: 15, age: 20 },
+                    { name: 'Charlie', grade: 18, age: 19 },
+                  ]);
+                });
               it('should not modify the original array', () => {
                 const students = [
                   { name: 'Alice', grade: 15, age: 20 },
