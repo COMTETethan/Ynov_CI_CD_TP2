@@ -1,6 +1,21 @@
+describe('sortStudents', () => {
+  it('should sort students by grade ascending', () => {
+    const students = [
+      { name: 'Alice', grade: 15, age: 20 },
+      { name: 'Bob', grade: 12, age: 22 },
+      { name: 'Charlie', grade: 18, age: 19 },
+    ];
+    const sorted = sortStudents(students, 'grade', 'asc');
+    expect(sorted).toEqual([
+      { name: 'Bob', grade: 12, age: 22 },
+      { name: 'Alice', grade: 15, age: 20 },
+      { name: 'Charlie', grade: 18, age: 19 },
+    ]);
+  });
+});
 
 import { describe, it, expect } from 'vitest';
-import { capitalize, calculateAverage, slugify, clamp } from '../src/utils.js';
+import { capitalize, calculateAverage, slugify, clamp, sortStudents } from '../src/utils.js';
 
 describe('capitalize', () => {
   it('should capitalize first letter and lowercase the rest', () => {

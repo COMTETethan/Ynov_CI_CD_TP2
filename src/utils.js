@@ -1,3 +1,10 @@
+// TDD: Fonction de tri des étudiants
+export function sortStudents(students, sortBy, order = 'asc') {
+  if (!Array.isArray(students) || students.length === 0) return [];
+  if (sortBy !== 'grade') return students.slice();
+  const sorted = students.slice().sort((a, b) => a.grade - b.grade);
+  return order === 'desc' ? sorted.reverse() : sorted;
+}
 // Fonctions utilitaires pour TP2
 
 /**
