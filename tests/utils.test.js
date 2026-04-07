@@ -1,4 +1,7 @@
 describe('sortStudents', () => {
+            it('should return empty array for empty input', () => {
+              expect(sortStudents([], 'grade', 'asc')).toEqual([]);
+            });
           it('should return empty array for null input', () => {
             expect(sortStudents(null, 'grade', 'asc')).toEqual([]);
           });
