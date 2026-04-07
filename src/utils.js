@@ -1,3 +1,39 @@
+// B1 : applyPromoCode
+/**
+ * Applique un code promo au sous-total.
+ * @param {number} subtotal
+ * @param {string|null} promoCode
+ * @param {Array} promoCodes
+ * @param {string} [today] - Optionnel, pour tests (YYYY-MM-DD)
+ * @returns {number} Le total après réduction, ou subtotal si pas de code, ou null si refusé
+ */
+export function applyPromoCode(subtotal, promoCode, promoCodes, today) {
+  if (typeof subtotal !== 'number' || isNaN(subtotal)) throw new Error('Invalid subtotal');
+  if (subtotal < 0) throw new Error('Subtotal cannot be negative');
+  if (!promoCode || typeof promoCode !== 'string' || promoCode.trim() === '') return subtotal;
+  if (!Array.isArray(promoCodes)) throw new Error('promoCodes must be an array');
+  const codeObj = promoCodes.find(c => c.code === promoCode);
+  if (!codeObj) throw new Error('Unknown promo code');
+  // Cas particulier : si subtotal = 0, minOrder = 0, la promo s'applique
+  if (subtotal === 0) {
+    // Si le sous-total est 0, la réduction s'applique toujours (résultat 0)
+  } else if (typeof codeObj.minOrder === 'number' && subtotal < codeObj.minOrder) {
+    return null;
+  }
+  // Date d'expiration
+  const now = today || new Date().toISOString().slice(0, 10);
+  if (codeObj.expiresAt && now > codeObj.expiresAt) return null;
+  let total = subtotal;
+  if (codeObj.type === 'percentage') {
+    total -= subtotal * (codeObj.value / 100);
+  } else if (codeObj.type === 'fixed') {
+    total -= codeObj.value;
+  } else {
+    throw new Error('Unknown promo type');
+  }
+  if (total < 0) total = 0;
+  return Math.round(total * 100) / 100;
+}
 // B1 : calculateDeliveryFee
 export function calculateDeliveryFee(distance, weight) {
   if (typeof distance !== 'number' || typeof weight !== 'number' || isNaN(distance) || isNaN(weight)) throw new Error('Invalid input');

@@ -1,3 +1,62 @@
+describe('applyPromoCode', () => {
+  const promoCodes = [
+    { code: 'BIENVENUE20', type: 'percentage', value: 20, minOrder: 15.00, expiresAt: '2026-12-31' },
+    { code: 'FIXE5', type: 'fixed', value: 5, minOrder: 10.00, expiresAt: '2026-12-31' },
+    { code: 'BIG10', type: 'fixed', value: 10, minOrder: 0, expiresAt: '2026-12-31' },
+    { code: 'FULL100', type: 'percentage', value: 100, minOrder: 0, expiresAt: '2026-12-31' },
+    { code: 'TODAY', type: 'fixed', value: 5, minOrder: 0, expiresAt: '2026-04-07' },
+    { code: 'EXPIRE', type: 'fixed', value: 5, minOrder: 0, expiresAt: '2026-04-06' },
+  ];
+
+  it('applique un code percentage 20% sur 50€', () => {
+    expect(applyPromoCode(50, 'BIENVENUE20', promoCodes, '2026-04-07')).toBe(40);
+  });
+  it('applique un code fixed 5€ sur 30€', () => {
+    expect(applyPromoCode(30, 'FIXE5', promoCodes, '2026-04-07')).toBe(25);
+  });
+  it('code valide avec minOrder respecté', () => {
+    expect(applyPromoCode(20, 'FIXE5', promoCodes, '2026-04-07')).toBe(15);
+  });
+
+  it('refuse un code expiré (date passée)', () => {
+    expect(applyPromoCode(30, 'EXPIRE', promoCodes, '2026-04-07')).toBeNull();
+  });
+  it('refuse si commande sous le minOrder', () => {
+    expect(applyPromoCode(5, 'FIXE5', promoCodes, '2026-04-07')).toBeNull();
+  });
+  it('erreur si code inconnu', () => {
+    expect(() => applyPromoCode(30, 'INCONNU', promoCodes, '2026-04-07')).toThrow();
+  });
+
+  it('total ne descend pas sous 0 avec fixed', () => {
+    expect(applyPromoCode(5, 'BIG10', promoCodes, '2026-04-07')).toBe(0);
+  });
+  it('total ne descend pas sous 0 avec percentage 100%', () => {
+    expect(applyPromoCode(50, 'FULL100', promoCodes, '2026-04-07')).toBe(0);
+  });
+  it('subtotal = 0, code fixed', () => {
+    expect(applyPromoCode(0, 'FIXE5', promoCodes, '2026-04-07')).toBe(0);
+  });
+  it('subtotal = 0, code percentage', () => {
+    expect(applyPromoCode(0, 'BIENVENUE20', promoCodes, '2026-04-07')).toBe(0);
+  });
+  it('code expire aujourd\'hui est accepté', () => {
+    expect(applyPromoCode(20, 'TODAY', promoCodes, '2026-04-07')).toBe(15);
+  });
+
+  it('promoCode null → pas de réduction', () => {
+    expect(applyPromoCode(50, null, promoCodes, '2026-04-07')).toBe(50);
+  });
+  it('promoCode vide → pas de réduction', () => {
+    expect(applyPromoCode(50, '', promoCodes, '2026-04-07')).toBe(50);
+  });
+  it('subtotal négatif → erreur', () => {
+    expect(() => applyPromoCode(-10, 'FIXE5', promoCodes, '2026-04-07')).toThrow();
+  });
+  it('promoCodes non array → erreur', () => {
+    expect(() => applyPromoCode(50, 'FIXE5', null, '2026-04-07')).toThrow();
+  });
+});
 describe('calculateDeliveryFee', () => {
   it('should return 2.00 for 2km, 1kg', () => {
     expect(calculateDeliveryFee(2, 1)).toBe(2.00);
@@ -265,7 +324,7 @@ describe('sortStudents', () => {
 });
 
 import { describe, it, expect } from 'vitest';
-import { capitalize, calculateAverage, slugify, clamp, sortStudents, parsePrice, groupBy, calculateDiscount, calculateDeliveryFee } from '../src/utils.js';
+import { capitalize, calculateAverage, slugify, clamp, sortStudents, parsePrice, groupBy, calculateDiscount, calculateDeliveryFee, applyPromoCode } from '../src/utils.js';
 
 describe('capitalize', () => {
   it('should handle undefined and numbers', () => {
