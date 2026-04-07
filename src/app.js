@@ -6,6 +6,9 @@ const app = new Hono();
 // Stockage mémoire des commandes
 const orders = [];
 let nextId = 1;
+// Expose pour tests
+app.orders = orders;
+app.nextId = nextId;
 // POST /orders/simulate
 app.post('/orders/simulate', async (c) => {
   try {
@@ -13,6 +16,7 @@ app.post('/orders/simulate', async (c) => {
     const promoCodes = [
       { code: 'PROMO20', type: 'percentage', value: 20, minOrder: 15.00, expiresAt: '2026-12-31' },
       { code: 'FIXE5', type: 'fixed', value: 5, minOrder: 10.00, expiresAt: '2026-12-31' },
+      { code: 'EXPIRE', type: 'percentage', value: 10, minOrder: 10.00, expiresAt: '2024-01-01' },
     ];
     const { items, distance, weight, promoCode, hour, dayOfWeek } = body;
     const result = calculateOrderTotal(items, distance, weight, promoCode, hour, dayOfWeek, promoCodes);
@@ -29,11 +33,27 @@ app.post('/orders', async (c) => {
     const promoCodes = [
       { code: 'PROMO20', type: 'percentage', value: 20, minOrder: 15.00, expiresAt: '2026-12-31' },
       { code: 'FIXE5', type: 'fixed', value: 5, minOrder: 10.00, expiresAt: '2026-12-31' },
+      { code: 'EXPIRE', type: 'percentage', value: 10, minOrder: 10.00, expiresAt: '2024-01-01' },
     ];
     const { items, distance, weight, promoCode, hour, dayOfWeek } = body;
     const result = calculateOrderTotal(items, distance, weight, promoCode, hour, dayOfWeek, promoCodes);
-    const order = { id: nextId++, ...body, ...result };
+    // Si le panier est vide ou total <= 0, refuser la commande
+    if (!items || !Array.isArray(items) || items.length === 0 || result.total <= 0) {
+      return c.json({ error: 'Commande invalide' }, 400);
+    }
+    // Utilise nextId exposé pour tests
+    if ('nextId' in app) {
+      if (typeof app.nextId === 'number') nextId = app.nextId;
+    }
+    // Trouve le prochain id disponible
+    let id = nextId;
+    while (orders.some(o => o.id === id)) {
+      id++;
+    }
+    const order = { id, ...body, ...result };
     orders.push(order);
+    nextId = id + 1;
+    app.nextId = nextId;
     return c.json(order, 201);
   } catch (e) {
     return c.json({ error: e.message }, 400);
@@ -55,6 +75,7 @@ app.post('/promo/validate', async (c) => {
     const promoCodes = [
       { code: 'PROMO20', type: 'percentage', value: 20, minOrder: 15.00, expiresAt: '2026-12-31' },
       { code: 'FIXE5', type: 'fixed', value: 5, minOrder: 10.00, expiresAt: '2026-12-31' },
+      { code: 'EXPIRE', type: 'percentage', value: 10, minOrder: 10.00, expiresAt: '2024-01-01' },
     ];
     const { code, subtotal } = body;
     if (!code) return c.json({ error: 'Missing code' }, 400);
