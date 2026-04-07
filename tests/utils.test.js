@@ -1,3 +1,91 @@
+describe('calculateDeliveryFee', () => {
+  it('should return 2.00 for 2km, 1kg', () => {
+    expect(calculateDeliveryFee(2, 1)).toBe(2.00);
+  });
+  it('should return 4.00 for 7km, 3kg', () => {
+    // 2.00 + (7-3)*0.5 = 4.00
+    expect(calculateDeliveryFee(7, 3)).toBe(4.00);
+  });
+  it('should return 4.50 for 5km, 8kg (lourd)', () => {
+    // 2.00 + (5-3)*0.5 + 1.5 = 4.50
+    expect(calculateDeliveryFee(5, 8)).toBe(4.50);
+  });
+  it('should return 2.00 for 1km, 1kg', () => {
+    expect(calculateDeliveryFee(1, 1)).toBe(2.00);
+  });
+  it('should return 2.00 for 3km, 2kg', () => {
+    expect(calculateDeliveryFee(3, 2)).toBe(2.00);
+  });
+
+  // 🟡 Cas limites
+  it('should return 2.00 for exactly 3km, 1kg', () => {
+    expect(calculateDeliveryFee(3, 1)).toBe(2.00);
+  });
+  it('should return 5.50 for exactly 10km, 5kg', () => {
+    // 2.00 + (10-3)*0.5 = 5.50
+    expect(calculateDeliveryFee(10, 5)).toBe(5.50);
+  });
+  it('should return 3.50 for 6km, 2kg', () => {
+    // 2.00 + (6-3)*0.5 = 3.50
+    expect(calculateDeliveryFee(6, 2)).toBe(3.50);
+  });
+  it('should return 7.00 for 10km, 6kg', () => {
+    // 2.00 + (10-3)*0.5 + 1.5 = 7.00
+    expect(calculateDeliveryFee(10, 6)).toBe(7.00);
+  });
+  it('should return 3.50 for 5.0km, 5.0kg', () => {
+    // 2.00 + (5-3)*0.5 = 3.00 (no supplement)
+    expect(calculateDeliveryFee(5, 5)).toBe(3.00);
+  });
+  it('should return 4.50 for 5.0km, 5.1kg', () => {
+    // 2.00 + (5-3)*0.5 + 1.5 = 4.50 (supplement)
+    expect(calculateDeliveryFee(5, 5.1)).toBe(4.50);
+  });
+  it('should return 2.00 for distance = 0', () => {
+    expect(calculateDeliveryFee(0, 1)).toBe(2.00);
+  });
+
+  it('should return null for >10km', () => {
+    expect(calculateDeliveryFee(15, 2)).toBeNull();
+  });
+  it('should throw for negative distance', () => {
+    expect(() => calculateDeliveryFee(-1, 2)).toThrow();
+  });
+  it('should throw for negative weight', () => {
+    expect(() => calculateDeliveryFee(2, -1)).toThrow();
+  });
+  it('should throw for NaN distance', () => {
+    expect(() => calculateDeliveryFee(NaN, 2)).toThrow();
+  });
+  it('should throw for NaN weight', () => {
+    expect(() => calculateDeliveryFee(2, NaN)).toThrow();
+  });
+  it('should throw for non-number distance', () => {
+    expect(() => calculateDeliveryFee("a", 2)).toThrow();
+  });
+  it('should throw for non-number weight', () => {
+    expect(() => calculateDeliveryFee(2, "b")).toThrow();
+  });
+
+  it('should return 3.50 for 6km, 2kg (calcul précis)', () => {
+    expect(calculateDeliveryFee(6, 2)).toBe(3.50);
+  });
+  it('should return 7.00 for 10km, 6kg (calcul précis)', () => {
+    expect(calculateDeliveryFee(10, 6)).toBe(7.00);
+  });
+  it('should return 2.00 for 3km, 5kg', () => {
+    expect(calculateDeliveryFee(3, 5)).toBe(2.00);
+  });
+  it('should return 3.00 for 5km, 5kg', () => {
+    expect(calculateDeliveryFee(5, 5)).toBe(3.00);
+  });
+  it('should return 4.50 for 5km, 6kg', () => {
+    expect(calculateDeliveryFee(5, 6)).toBe(4.50);
+  });
+  it('should return 2.00 for 0km, 0kg', () => {
+    expect(calculateDeliveryFee(0, 0)).toBe(2.00);
+  });
+});
 describe('calculateDiscount', () => {
   it('should apply percentage discount', () => {
     const rules = [{ type: 'percentage', value: 10 }];
@@ -177,7 +265,7 @@ describe('sortStudents', () => {
 });
 
 import { describe, it, expect } from 'vitest';
-import { capitalize, calculateAverage, slugify, clamp, sortStudents, parsePrice, groupBy, calculateDiscount } from '../src/utils.js';
+import { capitalize, calculateAverage, slugify, clamp, sortStudents, parsePrice, groupBy, calculateDiscount, calculateDeliveryFee } from '../src/utils.js';
 
 describe('capitalize', () => {
   it('should handle undefined and numbers', () => {

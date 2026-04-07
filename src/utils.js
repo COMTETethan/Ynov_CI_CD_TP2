@@ -1,3 +1,13 @@
+// B1 : calculateDeliveryFee
+export function calculateDeliveryFee(distance, weight) {
+  if (typeof distance !== 'number' || typeof weight !== 'number' || isNaN(distance) || isNaN(weight)) throw new Error('Invalid input');
+  if (distance < 0 || weight < 0) throw new Error('Negative values not allowed');
+  if (distance > 10) return null;
+  let fee = 2.00;
+  if (distance > 3) fee += (distance - 3) * 0.5;
+  if (weight > 5) fee += 1.5;
+  return Math.round(fee * 100) / 100;
+}
 // A7 : calculateDiscount
 export function calculateDiscount(price, discountRules) {
   if (typeof price !== 'number' || price < 0 || !Array.isArray(discountRules)) throw new Error('Invalid input');
