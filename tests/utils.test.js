@@ -1,4 +1,14 @@
 describe('sortStudents', () => {
+              it('should not modify the original array', () => {
+                const students = [
+                  { name: 'Alice', grade: 15, age: 20 },
+                  { name: 'Bob', grade: 12, age: 22 },
+                  { name: 'Charlie', grade: 18, age: 19 },
+                ];
+                const copy = [...students.map(s => ({ ...s }))];
+                sortStudents(students, 'grade', 'asc');
+                expect(students).toEqual(copy);
+              });
             it('should return empty array for empty input', () => {
               expect(sortStudents([], 'grade', 'asc')).toEqual([]);
             });
