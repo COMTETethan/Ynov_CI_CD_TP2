@@ -1,4 +1,7 @@
 describe('sortStudents', () => {
+          it('should return empty array for null input', () => {
+            expect(sortStudents(null, 'grade', 'asc')).toEqual([]);
+          });
         it('should sort students by age ascending', () => {
           const students = [
             { name: 'Charlie', grade: 18, age: 19 },
