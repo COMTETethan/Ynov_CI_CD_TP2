@@ -6,10 +6,8 @@ const app = new Hono();
 // Exemple de route
 app.get('/ping', (c) => c.json({ message: 'pong' }));
 
-// Swagger UI
-app.route('/docs', swaggerUI({
-  url: '/openapi.json',
-}));
+// Swagger UI (corrigé)
+app.get('/docs', swaggerUI({ url: '/openapi.json' }));
 
 // OpenAPI spec minimal
 app.get('/openapi.json', (c) =>

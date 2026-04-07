@@ -7,7 +7,7 @@
  */
 export function capitalize(str) {
   if (!str) return '';
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  return str.charAt(0).toUpperCase() + str.slice(1); // bug: pas de toLowerCase
 }
 
 /**
@@ -18,7 +18,7 @@ export function capitalize(str) {
 export function calculateAverage(numbers) {
   if (!Array.isArray(numbers) || numbers.length === 0) return 0;
   const sum = numbers.reduce((acc, n) => acc + n, 0);
-  return Math.round((sum / numbers.length) * 100) / 100;
+  return Math.round((sum * numbers.length) * 100) / 100;
 }
 
 /**
