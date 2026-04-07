@@ -1,3 +1,97 @@
+describe('calculateDiscount', () => {
+  it('should apply percentage discount', () => {
+    const rules = [{ type: 'percentage', value: 10 }];
+    expect(calculateDiscount(100, rules)).toBe(90);
+  });
+  it('should apply fixed discount', () => {
+    const rules = [{ type: 'fixed', value: 5 }];
+    expect(calculateDiscount(50, rules)).toBe(45);
+  });
+  it('should apply multiple discounts in order', () => {
+    const rules = [
+      { type: 'percentage', value: 10 },
+      { type: 'fixed', value: 5 },
+    ];
+    expect(calculateDiscount(100, rules)).toBe(85);
+  });
+  it('should not go below zero', () => {
+    const rules = [{ type: 'fixed', value: 200 }];
+    expect(calculateDiscount(100, rules)).toBe(0);
+  });
+  it('should handle buyXgetY', () => {
+    const rules = [
+      { type: 'buyXgetY', buy: 3, free: 1, itemPrice: 10 },
+    ];
+    expect(calculateDiscount(40, rules)).toBe(30);
+  });
+  it('should return error for invalid input', () => {
+    expect(() => calculateDiscount(null, null)).toThrow();
+    expect(() => calculateDiscount(100, [{ type: 'unknown' }])).toThrow();
+  });
+});
+describe('groupBy', () => {
+    it('should return empty object for empty array', () => {
+      expect(groupBy([], 'role')).toEqual({});
+    });
+    it('should return empty object for null input', () => {
+      expect(groupBy(null, 'role')).toEqual({});
+    });
+    it('should handle missing key', () => {
+      const arr = [
+        { name: 'Alice', role: 'dev' },
+        { name: 'Bob' },
+      ];
+      expect(groupBy(arr, 'role')).toEqual({
+        dev: [{ name: 'Alice', role: 'dev' }],
+        undefined: [{ name: 'Bob' }],
+      });
+    });
+    it('should handle one group', () => {
+      const arr = [
+        { name: 'Alice', role: 'dev' },
+        { name: 'Charlie', role: 'dev' },
+      ];
+      expect(groupBy(arr, 'role')).toEqual({
+        dev: [
+          { name: 'Alice', role: 'dev' },
+          { name: 'Charlie', role: 'dev' },
+        ],
+      });
+    });
+  it('should group objects by key', () => {
+    const arr = [
+      { name: 'Alice', role: 'dev' },
+      { name: 'Bob', role: 'design' },
+      { name: 'Charlie', role: 'dev' },
+    ];
+    expect(groupBy(arr, 'role')).toEqual({
+      dev: [
+        { name: 'Alice', role: 'dev' },
+        { name: 'Charlie', role: 'dev' },
+      ],
+      design: [
+        { name: 'Bob', role: 'design' },
+      ],
+    });
+  });
+});
+describe('parsePrice', () => {
+  it('should parse valid price strings', () => {
+    expect(parsePrice('12.99')).toBe(12.99);
+    expect(parsePrice('12,99')).toBe(12.99);
+    expect(parsePrice('12.99 €')).toBe(12.99);
+    expect(parsePrice('€12.99')).toBe(12.99);
+    expect(parsePrice(12.99)).toBe(12.99);
+  });
+  it('should parse gratuit as 0', () => {
+    expect(parsePrice('gratuit')).toBe(0);
+  });
+  it('should return null for invalid or negative', () => {
+    expect(parsePrice('abc')).toBeNull();
+    expect(parsePrice('-5.00')).toBeNull();
+    expect(parsePrice(null)).toBeNull();
+  });
+});
 describe('sortStudents', () => {
                 it('should default to ascending order', () => {
                   const students = [
@@ -83,7 +177,7 @@ describe('sortStudents', () => {
 });
 
 import { describe, it, expect } from 'vitest';
-import { capitalize, calculateAverage, slugify, clamp, sortStudents } from '../src/utils.js';
+import { capitalize, calculateAverage, slugify, clamp, sortStudents, parsePrice, groupBy, calculateDiscount } from '../src/utils.js';
 
 describe('capitalize', () => {
   it('should capitalize first letter and lowercase the rest', () => {

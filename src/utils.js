@@ -1,3 +1,51 @@
+// A7 : calculateDiscount
+export function calculateDiscount(price, discountRules) {
+  if (typeof price !== 'number' || price < 0 || !Array.isArray(discountRules)) throw new Error('Invalid input');
+  let result = price;
+  for (const rule of discountRules) {
+    if (rule.type === 'percentage') {
+      result -= (result * (rule.value / 100));
+    } else if (rule.type === 'fixed') {
+      result -= rule.value;
+    } else if (rule.type === 'buyXgetY') {
+      if (typeof rule.buy !== 'number' || typeof rule.free !== 'number' || typeof rule.itemPrice !== 'number') throw new Error('Invalid buyXgetY');
+      // Suppose le prix = quantité * itemPrice
+      const qty = Math.floor(result / rule.itemPrice);
+      const freeItems = Math.floor(qty / (rule.buy + rule.free)) * rule.free;
+      result -= freeItems * rule.itemPrice;
+    } else {
+      throw new Error('Unknown rule');
+    }
+    if (result < 0) result = 0;
+  }
+  return Math.max(0, Math.round(result * 100) / 100);
+}
+// A6 : groupBy
+export function groupBy(array, key) {
+  if (!Array.isArray(array) || !key) return {};
+  return array.reduce((acc, obj) => {
+    const val = obj[key];
+    if (!acc[val]) acc[val] = [];
+    acc[val].push(obj);
+    return acc;
+  }, {});
+}
+// A5 : parsePrice
+export function parsePrice(input) {
+  if (input === null || input === undefined) return null;
+  if (typeof input === 'number') return input >= 0 ? input : null;
+  if (typeof input === 'string') {
+    const str = input.trim().toLowerCase();
+    if (str === 'gratuit') return 0;
+    let cleaned = str.replace(/€/g, '').replace(/ /g, '').replace(',', '.');
+    if (/^-?\d+(\.\d+)?$/.test(cleaned)) {
+      const num = parseFloat(cleaned);
+      return num >= 0 ? num : null;
+    }
+    return null;
+  }
+  return null;
+}
 // TDD: Fonction de tri des étudiants
 export function sortStudents(students, sortBy, order = 'asc') {
   if (!Array.isArray(students) || students.length === 0) return [];
