@@ -7,10 +7,10 @@
  */
 export function isValidEmail(email) {
   if (typeof email !== 'string') return false;
-  // const parts = email.split('@');
-  // if (parts.length !== 2) return false;
-  const domain = email; // bug: ne vérifie plus le @
-  return domain.includes('.') && domain.length > 0 && domain.split('.').every(Boolean);
+  const parts = email.split('@');
+  if (parts.length !== 2) return false;
+  const domain = parts[1];
+  return domain.includes('.') && parts[0].length > 0 && domain.split('.').every(Boolean);
 }
 
 /**
