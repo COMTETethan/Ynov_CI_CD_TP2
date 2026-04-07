@@ -1,14 +1,14 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    include: ['tests/**/*.test.js'],
+    include: ["tests/**/*.test.js"],
     coverage: {
-      provider: 'istanbul',
+      provider: "istanbul",
       all: true,
-      include: ['src/**/*.js'],
-      exclude: ['node_modules', 'tests'],
-      reporter: ['text', 'lcov'],
+      include: ["src/**/*.js"],
+      exclude: ["node_modules", "tests"],
+      reporter: ["text", "lcov"],
       lines: 80,
       functions: 80,
       branches: 80,
@@ -17,4 +17,4 @@ export default defineConfig({
     },
     testTimeout: 20000,
   },
-})
+});

@@ -1,22 +1,22 @@
-import js from '@eslint/js';
+import js from "@eslint/js";
 
 export default [
   js.configs.recommended,
   {
-    files: ['src/**/*.js', 'tests/**/*.js'],
+    files: ["src/**/*.js", "tests/**/*.js"],
     languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
+      ecmaVersion: "latest",
+      sourceType: "module",
       globals: {
-        console: 'readonly',
+        console: "readonly",
       },
     },
     rules: {
-      'no-unused-vars': 'error',
-      'no-console': 'off',
-      indent: ['error', 2],
-      quotes: ['error', 'single'],
-      semi: ['error', 'always'],
+      "no-unused-vars": "error",
+      "no-console": "off",
+      indent: ["error", 2],
+      quotes: ["error", "single"],
+      semi: ["error", "always"],
     },
   },
 ];

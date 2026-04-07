@@ -10,14 +10,28 @@
  * @param {Array} [promoCodes] - Optionnel, pour tests
  * @returns {object} { subtotal, discount, deliveryFee, surge, total }
  */
-export function calculateOrderTotal(items, distance, weight, promoCode, hour, dayOfWeek, promoCodes) {
-  if (!Array.isArray(items) || items.length === 0) throw new Error('Empty cart');
+export function calculateOrderTotal(
+  items,
+  distance,
+  weight,
+  promoCode,
+  hour,
+  dayOfWeek,
+  promoCodes,
+) {
+  if (!Array.isArray(items) || items.length === 0)
+    throw new Error("Empty cart");
   // 1. Calculer le sous-total
   let subtotal = 0;
   for (const item of items) {
-    if (!item || typeof item.price !== 'number' || typeof item.quantity !== 'number') throw new Error('Invalid item');
-    if (item.price < 0) throw new Error('Negative price');
-    if (item.quantity < 0) throw new Error('Negative quantity');
+    if (
+      !item ||
+      typeof item.price !== "number" ||
+      typeof item.quantity !== "number"
+    )
+      throw new Error("Invalid item");
+    if (item.price < 0) throw new Error("Negative price");
+    if (item.quantity < 0) throw new Error("Negative quantity");
     if (item.quantity === 0) continue;
     subtotal += item.price * item.quantity;
   }
@@ -26,27 +40,28 @@ export function calculateOrderTotal(items, distance, weight, promoCode, hour, da
   let discount = 0;
   let subtotalAfterDiscount = subtotal;
   if (promoCode) {
-    if (!promoCodes) throw new Error('promoCodes required');
+    if (!promoCodes) throw new Error("promoCodes required");
     const after = applyPromoCode(subtotal, promoCode, promoCodes);
-    if (after === null) throw new Error('Promo refused');
+    if (after === null) throw new Error("Promo refused");
     discount = Math.round((subtotal - after) * 100) / 100;
     subtotalAfterDiscount = after;
   }
   // 3. Calculer les frais de livraison
   const deliveryFee = calculateDeliveryFee(distance, weight);
-  if (deliveryFee === null) throw new Error('Delivery not available');
+  if (deliveryFee === null) throw new Error("Delivery not available");
   // 4. Appliquer le multiplicateur surge
   const surge = calculateSurge(hour, dayOfWeek);
-  if (surge === 0) throw new Error('Closed');
-  const deliveryWithSurge = Math.round((deliveryFee * surge) * 100) / 100;
+  if (surge === 0) throw new Error("Closed");
+  const deliveryWithSurge = Math.round(deliveryFee * surge * 100) / 100;
   // 5. Total
-  const total = Math.round((subtotalAfterDiscount + deliveryWithSurge) * 100) / 100;
+  const total =
+    Math.round((subtotalAfterDiscount + deliveryWithSurge) * 100) / 100;
   return {
     subtotal,
     discount,
     deliveryFee: deliveryWithSurge,
     surge,
-    total
+    total,
   };
 }
 // B1 : calculateSurge
@@ -57,14 +72,22 @@ export function calculateOrderTotal(items, distance, weight, promoCode, hour, da
  * @returns {number} Le multiplicateur (0 si fermé)
  */
 export function calculateSurge(hour, dayOfWeek) {
-  if (typeof hour !== 'number' || typeof dayOfWeek !== 'number' || isNaN(hour) || isNaN(dayOfWeek)) throw new Error('Invalid input');
-  if (hour < 0 || hour >= 24 || dayOfWeek < 0 || dayOfWeek > 6) throw new Error('Invalid hour or day');
+  if (
+    typeof hour !== "number" ||
+    typeof dayOfWeek !== "number" ||
+    isNaN(hour) ||
+    isNaN(dayOfWeek)
+  )
+    throw new Error("Invalid input");
+  if (hour < 0 || hour >= 24 || dayOfWeek < 0 || dayOfWeek > 6)
+    throw new Error("Invalid hour or day");
   // Fermé avant 10h ou après 22h
   if (hour < 10 || hour >= 22) return 0;
   // Dimanche
   if (dayOfWeek === 0) return 1.2;
   // Vendredi (5) ou samedi (6) soir 19h-22h
-  if ((dayOfWeek === 5 || dayOfWeek === 6) && hour >= 19 && hour < 22) return 1.8;
+  if ((dayOfWeek === 5 || dayOfWeek === 6) && hour >= 19 && hour < 22)
+    return 1.8;
   // Lundi-jeudi (1-4)
   if (dayOfWeek >= 1 && dayOfWeek <= 4) {
     // Déjeuner 12h-13h30
@@ -89,59 +112,78 @@ export function calculateSurge(hour, dayOfWeek) {
  * @returns {number} Le total après réduction, ou subtotal si pas de code, ou null si refusé
  */
 export function applyPromoCode(subtotal, promoCode, promoCodes, today) {
-  if (typeof subtotal !== 'number' || isNaN(subtotal)) throw new Error('Invalid subtotal');
-  if (subtotal < 0) throw new Error('Subtotal cannot be negative');
-  if (!promoCode || typeof promoCode !== 'string' || promoCode.trim() === '') return subtotal;
-  if (!Array.isArray(promoCodes)) throw new Error('promoCodes must be an array');
-  const codeObj = promoCodes.find(c => c.code === promoCode);
-  if (!codeObj) throw new Error('Unknown promo code');
+  if (typeof subtotal !== "number" || isNaN(subtotal))
+    throw new Error("Invalid subtotal");
+  if (subtotal < 0) throw new Error("Subtotal cannot be negative");
+  if (!promoCode || typeof promoCode !== "string" || promoCode.trim() === "")
+    return subtotal;
+  if (!Array.isArray(promoCodes))
+    throw new Error("promoCodes must be an array");
+  const codeObj = promoCodes.find((c) => c.code === promoCode);
+  if (!codeObj) throw new Error("Unknown promo code");
   // Cas particulier : si subtotal = 0, minOrder = 0, la promo s'applique
   if (subtotal === 0) {
     // Si le sous-total est 0, la réduction s'applique toujours (résultat 0)
-  } else if (typeof codeObj.minOrder === 'number' && subtotal < codeObj.minOrder) {
+  } else if (
+    typeof codeObj.minOrder === "number" &&
+    subtotal < codeObj.minOrder
+  ) {
     return null;
   }
   // Date d'expiration
   const now = today || new Date().toISOString().slice(0, 10);
   if (codeObj.expiresAt && now > codeObj.expiresAt) return null;
   let total = subtotal;
-  if (codeObj.type === 'percentage') {
+  if (codeObj.type === "percentage") {
     total -= subtotal * (codeObj.value / 100);
-  } else if (codeObj.type === 'fixed') {
+  } else if (codeObj.type === "fixed") {
     total -= codeObj.value;
   } else {
-    throw new Error('Unknown promo type');
+    throw new Error("Unknown promo type");
   }
   if (total < 0) total = 0;
   return Math.round(total * 100) / 100;
 }
 // B1 : calculateDeliveryFee
 export function calculateDeliveryFee(distance, weight) {
-  if (typeof distance !== 'number' || typeof weight !== 'number' || isNaN(distance) || isNaN(weight)) throw new Error('Invalid input');
-  if (distance < 0 || weight < 0) throw new Error('Negative values not allowed');
+  if (
+    typeof distance !== "number" ||
+    typeof weight !== "number" ||
+    isNaN(distance) ||
+    isNaN(weight)
+  )
+    throw new Error("Invalid input");
+  if (distance < 0 || weight < 0)
+    throw new Error("Negative values not allowed");
   if (distance > 10) return null;
-  let fee = 2.00;
+  let fee = 2.0;
   if (distance > 3) fee += (distance - 3) * 0.5;
   if (weight > 5) fee += 1.5;
   return Math.round(fee * 100) / 100;
 }
 // A7 : calculateDiscount
 export function calculateDiscount(price, discountRules) {
-  if (typeof price !== 'number' || price < 0 || !Array.isArray(discountRules)) throw new Error('Invalid input');
+  if (typeof price !== "number" || price < 0 || !Array.isArray(discountRules))
+    throw new Error("Invalid input");
   let result = price;
   for (const rule of discountRules) {
-    if (rule.type === 'percentage') {
-      result -= (result * (rule.value / 100));
-    } else if (rule.type === 'fixed') {
+    if (rule.type === "percentage") {
+      result -= result * (rule.value / 100);
+    } else if (rule.type === "fixed") {
       result -= rule.value;
-    } else if (rule.type === 'buyXgetY') {
-      if (typeof rule.buy !== 'number' || typeof rule.free !== 'number' || typeof rule.itemPrice !== 'number') throw new Error('Invalid buyXgetY');
+    } else if (rule.type === "buyXgetY") {
+      if (
+        typeof rule.buy !== "number" ||
+        typeof rule.free !== "number" ||
+        typeof rule.itemPrice !== "number"
+      )
+        throw new Error("Invalid buyXgetY");
       // Suppose le prix = quantité * itemPrice
       const qty = Math.floor(result / rule.itemPrice);
       const freeItems = Math.floor(qty / (rule.buy + rule.free)) * rule.free;
       result -= freeItems * rule.itemPrice;
     } else {
-      throw new Error('Unknown rule');
+      throw new Error("Unknown rule");
     }
     if (result < 0) result = 0;
   }
@@ -160,11 +202,11 @@ export function groupBy(array, key) {
 // A5 : parsePrice
 export function parsePrice(input) {
   if (input === null || input === undefined) return null;
-  if (typeof input === 'number') return input >= 0 ? input : null;
-  if (typeof input === 'string') {
+  if (typeof input === "number") return input >= 0 ? input : null;
+  if (typeof input === "string") {
     const str = input.trim().toLowerCase();
-    if (str === 'gratuit') return 0;
-    let cleaned = str.replace(/€/g, '').replace(/ /g, '').replace(',', '.');
+    if (str === "gratuit") return 0;
+    let cleaned = str.replace(/€/g, "").replace(/ /g, "").replace(",", ".");
     if (/^-?\d+(\.\d+)?$/.test(cleaned)) {
       const num = parseFloat(cleaned);
       return num >= 0 ? num : null;
@@ -174,19 +216,19 @@ export function parsePrice(input) {
   return null;
 }
 // TDD: Fonction de tri des étudiants
-export function sortStudents(students, sortBy, order = 'asc') {
+export function sortStudents(students, sortBy, order = "asc") {
   if (!Array.isArray(students) || students.length === 0) return [];
   let sorted;
-  if (sortBy === 'grade') {
+  if (sortBy === "grade") {
     sorted = students.slice().sort((a, b) => a.grade - b.grade);
-  } else if (sortBy === 'name') {
+  } else if (sortBy === "name") {
     sorted = students.slice().sort((a, b) => a.name.localeCompare(b.name));
-  } else if (sortBy === 'age') {
+  } else if (sortBy === "age") {
     sorted = students.slice().sort((a, b) => a.age - b.age);
   } else {
     sorted = students.slice();
   }
-  return order === 'desc' ? sorted.reverse() : sorted;
+  return order === "desc" ? sorted.reverse() : sorted;
 }
 // Fonctions utilitaires pour TP2
 
@@ -196,7 +238,7 @@ export function sortStudents(students, sortBy, order = 'asc') {
  * @returns {string}
  */
 export function capitalize(str) {
-  if (typeof str !== 'string' || !str) return '';
+  if (typeof str !== "string" || !str) return "";
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
@@ -207,7 +249,7 @@ export function capitalize(str) {
  */
 export function calculateAverage(numbers) {
   if (!Array.isArray(numbers) || numbers.length === 0) return 0;
-  const valid = numbers.filter(n => typeof n === 'number' && !isNaN(n));
+  const valid = numbers.filter((n) => typeof n === "number" && !isNaN(n));
   if (valid.length === 0) return 0;
   const sum = valid.reduce((acc, n) => acc + n, 0);
   return Math.round((sum / valid.length) * 100) / 100;
@@ -219,14 +261,14 @@ export function calculateAverage(numbers) {
  * @returns {string}
  */
 export function slugify(text) {
-  if (!text) return '';
+  if (!text) return "";
   return text
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 /**
@@ -237,6 +279,6 @@ export function slugify(text) {
  * @returns {number}
  */
 export function clamp(value, min, max) {
-  if (typeof value !== 'number' || isNaN(value)) return min;
+  if (typeof value !== "number" || isNaN(value)) return min;
   return Math.max(min, Math.min(max, value));
 }
