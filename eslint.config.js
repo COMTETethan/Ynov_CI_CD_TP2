@@ -15,7 +15,7 @@ export default [
       "no-unused-vars": "error",
       "no-console": "off",
       indent: ["error", 2],
-      quotes: ["error", "single"],
+      quotes: ["error", "double"],
       semi: ["error", "always"],
     },
   },
