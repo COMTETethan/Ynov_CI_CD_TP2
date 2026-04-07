@@ -1,3 +1,33 @@
+// B1 : calculateSurge
+/**
+ * Calcule le multiplicateur de prix selon l'heure et le jour.
+ * @param {number} hour - Heure décimale (ex: 14.5 pour 14h30)
+ * @param {number} dayOfWeek - 0=dimanche, 1=lundi, ..., 6=samedi
+ * @returns {number} Le multiplicateur (0 si fermé)
+ */
+export function calculateSurge(hour, dayOfWeek) {
+  if (typeof hour !== 'number' || typeof dayOfWeek !== 'number' || isNaN(hour) || isNaN(dayOfWeek)) throw new Error('Invalid input');
+  if (hour < 0 || hour >= 24 || dayOfWeek < 0 || dayOfWeek > 6) throw new Error('Invalid hour or day');
+  // Fermé avant 10h ou après 22h
+  if (hour < 10 || hour >= 22) return 0;
+  // Dimanche
+  if (dayOfWeek === 0) return 1.2;
+  // Vendredi (5) ou samedi (6) soir 19h-22h
+  if ((dayOfWeek === 5 || dayOfWeek === 6) && hour >= 19 && hour < 22) return 1.8;
+  // Lundi-jeudi (1-4)
+  if (dayOfWeek >= 1 && dayOfWeek <= 4) {
+    // Déjeuner 12h-13h30
+    if (hour >= 12 && hour < 13.5) return 1.3;
+    // Diner 19h-21h
+    if (hour >= 19 && hour < 21) return 1.5;
+    // Normal 10h-11h30 ou 14h-18h
+    if ((hour >= 10 && hour < 11.5) || (hour >= 14 && hour < 18)) return 1.0;
+    // Sinon, normal (autres créneaux ouverts)
+    return 1.0;
+  }
+  // Sinon, normal
+  return 1.0;
+}
 // B1 : applyPromoCode
 /**
  * Applique un code promo au sous-total.

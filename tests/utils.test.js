@@ -1,3 +1,62 @@
+describe('calculateSurge', () => {
+  it('Mardi 15h → 1.0 (normal)', () => {
+    expect(calculateSurge(15, 2)).toBe(1.0); // mardi
+  });
+  it('Mercredi 12h30 → 1.3 (dejeuner)', () => {
+    expect(calculateSurge(12.5, 3)).toBe(1.3); // mercredi
+  });
+  it('Jeudi 20h → 1.5 (diner)', () => {
+    expect(calculateSurge(20, 4)).toBe(1.5); // jeudi
+  });
+  it('Vendredi 21h → 1.8 (weekend soir)', () => {
+    expect(calculateSurge(21, 5)).toBe(1.8); // vendredi
+  });
+  it('Samedi 19h → 1.8 (weekend soir)', () => {
+    expect(calculateSurge(19, 6)).toBe(1.8); // samedi
+  });
+  it('Dimanche 14h → 1.2 (dimanche)', () => {
+    expect(calculateSurge(14, 0)).toBe(1.2);
+  });
+
+  it('Jeudi 11h30 pile → 1.0 (normal)', () => {
+    expect(calculateSurge(11.5, 4)).toBe(1.0);
+  });
+  it('Lundi 12h → 1.3 (dejeuner)', () => {
+    expect(calculateSurge(12, 1)).toBe(1.3);
+  });
+  it('Mardi 13h29 → 1.3 (dejeuner)', () => {
+    expect(calculateSurge(13.49, 2)).toBe(1.3);
+  });
+  it('Mardi 13h30 pile → 1.0 (normal)', () => {
+    expect(calculateSurge(13.5, 2)).toBe(1.0);
+  });
+  it('Jeudi 19h00 pile → 1.5 (diner)', () => {
+    expect(calculateSurge(19, 4)).toBe(1.5);
+  });
+  it('Vendredi 22h00 pile → 0 (fermé)', () => {
+    expect(calculateSurge(22, 5)).toBe(0);
+  });
+  it('Samedi 9h59 → 0 (fermé)', () => {
+    expect(calculateSurge(9.99, 6)).toBe(0);
+  });
+  it('Samedi 10h00 → 1.0 (normal)', () => {
+    expect(calculateSurge(10, 6)).toBe(1.0);
+  });
+
+  it('Heure négative → erreur', () => {
+    expect(() => calculateSurge(-1, 2)).toThrow();
+  });
+  it('Jour hors plage → erreur', () => {
+    expect(() => calculateSurge(12, 7)).toThrow();
+  });
+  it('Heure >= 24 → erreur', () => {
+    expect(() => calculateSurge(24, 2)).toThrow();
+  });
+  it('Entrée non numérique → erreur', () => {
+    expect(() => calculateSurge('12', 2)).toThrow();
+    expect(() => calculateSurge(12, '2')).toThrow();
+  });
+});
 describe('applyPromoCode', () => {
   const promoCodes = [
     { code: 'BIENVENUE20', type: 'percentage', value: 20, minOrder: 15.00, expiresAt: '2026-12-31' },
@@ -76,7 +135,6 @@ describe('calculateDeliveryFee', () => {
     expect(calculateDeliveryFee(3, 2)).toBe(2.00);
   });
 
-  // 🟡 Cas limites
   it('should return 2.00 for exactly 3km, 1kg', () => {
     expect(calculateDeliveryFee(3, 1)).toBe(2.00);
   });
@@ -324,7 +382,7 @@ describe('sortStudents', () => {
 });
 
 import { describe, it, expect } from 'vitest';
-import { capitalize, calculateAverage, slugify, clamp, sortStudents, parsePrice, groupBy, calculateDiscount, calculateDeliveryFee, applyPromoCode } from '../src/utils.js';
+import { capitalize, calculateAverage, slugify, clamp, sortStudents, parsePrice, groupBy, calculateDiscount, calculateDeliveryFee, applyPromoCode, calculateSurge } from '../src/utils.js';
 
 describe('capitalize', () => {
   it('should handle undefined and numbers', () => {
