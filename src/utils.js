@@ -6,6 +6,8 @@ export function sortStudents(students, sortBy, order = 'asc') {
     sorted = students.slice().sort((a, b) => a.grade - b.grade);
   } else if (sortBy === 'name') {
     sorted = students.slice().sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sortBy === 'age') {
+    sorted = students.slice().sort((a, b) => a.age - b.age);
   } else {
     sorted = students.slice();
   }
