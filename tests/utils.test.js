@@ -3,10 +3,6 @@ describe('calculateOrderTotal', () => {
     { code: 'PROMO20', type: 'percentage', value: 20, minOrder: 15.00, expiresAt: '2026-12-31' },
     { code: 'FIXE5', type: 'fixed', value: 5, minOrder: 10.00, expiresAt: '2026-12-31' },
   ];
-  const items = [
-    { name: 'Pizza', price: 12.5, quantity: 2 },
-    { name: 'Soda', price: 3, quantity: 1 }
-  ];
 
   // Scénario complet
   it('2 pizzas à 12.50€ + 5km + mardi 15h', () => {
@@ -295,10 +291,10 @@ describe('calculateDeliveryFee', () => {
     expect(() => calculateDeliveryFee(2, NaN)).toThrow();
   });
   it('should throw for non-number distance', () => {
-    expect(() => calculateDeliveryFee("a", 2)).toThrow();
+    expect(() => calculateDeliveryFee('a', 2)).toThrow();
   });
   it('should throw for non-number weight', () => {
-    expect(() => calculateDeliveryFee(2, "b")).toThrow();
+    expect(() => calculateDeliveryFee(2, 'b')).toThrow();
   });
 
   it('should return 3.50 for 6km, 2kg (calcul précis)', () => {
@@ -352,34 +348,34 @@ describe('calculateDiscount', () => {
   });
 });
 describe('groupBy', () => {
-    it('should return empty object for empty array', () => {
-      expect(groupBy([], 'role')).toEqual({});
+  it('should return empty object for empty array', () => {
+    expect(groupBy([], 'role')).toEqual({});
+  });
+  it('should return empty object for null input', () => {
+    expect(groupBy(null, 'role')).toEqual({});
+  });
+  it('should handle missing key', () => {
+    const arr = [
+      { name: 'Alice', role: 'dev' },
+      { name: 'Bob' },
+    ];
+    expect(groupBy(arr, 'role')).toEqual({
+      dev: [{ name: 'Alice', role: 'dev' }],
+      undefined: [{ name: 'Bob' }],
     });
-    it('should return empty object for null input', () => {
-      expect(groupBy(null, 'role')).toEqual({});
-    });
-    it('should handle missing key', () => {
-      const arr = [
-        { name: 'Alice', role: 'dev' },
-        { name: 'Bob' },
-      ];
-      expect(groupBy(arr, 'role')).toEqual({
-        dev: [{ name: 'Alice', role: 'dev' }],
-        undefined: [{ name: 'Bob' }],
-      });
-    });
-    it('should handle one group', () => {
-      const arr = [
+  });
+  it('should handle one group', () => {
+    const arr = [
+      { name: 'Alice', role: 'dev' },
+      { name: 'Charlie', role: 'dev' },
+    ];
+    expect(groupBy(arr, 'role')).toEqual({
+      dev: [
         { name: 'Alice', role: 'dev' },
         { name: 'Charlie', role: 'dev' },
-      ];
-      expect(groupBy(arr, 'role')).toEqual({
-        dev: [
-          { name: 'Alice', role: 'dev' },
-          { name: 'Charlie', role: 'dev' },
-        ],
-      });
+      ],
     });
+  });
   it('should group objects by key', () => {
     const arr = [
       { name: 'Alice', role: 'dev' },
@@ -415,74 +411,74 @@ describe('parsePrice', () => {
   });
 });
 describe('sortStudents', () => {
-                it('should default to ascending order', () => {
-                  const students = [
-                    { name: 'Alice', grade: 15, age: 20 },
-                    { name: 'Bob', grade: 12, age: 22 },
-                    { name: 'Charlie', grade: 18, age: 19 },
-                  ];
-                  const sorted = sortStudents(students, 'grade');
-                  expect(sorted).toEqual([
-                    { name: 'Bob', grade: 12, age: 22 },
-                    { name: 'Alice', grade: 15, age: 20 },
-                    { name: 'Charlie', grade: 18, age: 19 },
-                  ]);
-                });
-              it('should not modify the original array', () => {
-                const students = [
-                  { name: 'Alice', grade: 15, age: 20 },
-                  { name: 'Bob', grade: 12, age: 22 },
-                  { name: 'Charlie', grade: 18, age: 19 },
-                ];
-                const copy = [...students.map(s => ({ ...s }))];
-                sortStudents(students, 'grade', 'asc');
-                expect(students).toEqual(copy);
-              });
-            it('should return empty array for empty input', () => {
-              expect(sortStudents([], 'grade', 'asc')).toEqual([]);
-            });
-          it('should return empty array for null input', () => {
-            expect(sortStudents(null, 'grade', 'asc')).toEqual([]);
-          });
-        it('should sort students by age ascending', () => {
-          const students = [
-            { name: 'Charlie', grade: 18, age: 19 },
-            { name: 'Bob', grade: 12, age: 22 },
-            { name: 'Alice', grade: 15, age: 20 },
-          ];
-          const sorted = sortStudents(students, 'age', 'asc');
-          expect(sorted).toEqual([
-            { name: 'Charlie', grade: 18, age: 19 },
-            { name: 'Alice', grade: 15, age: 20 },
-            { name: 'Bob', grade: 12, age: 22 },
-          ]);
-        });
-      it('should sort students by name ascending', () => {
-        const students = [
-          { name: 'Charlie', grade: 18, age: 19 },
-          { name: 'Bob', grade: 12, age: 22 },
-          { name: 'Alice', grade: 15, age: 20 },
-        ];
-        const sorted = sortStudents(students, 'name', 'asc');
-        expect(sorted).toEqual([
-          { name: 'Alice', grade: 15, age: 20 },
-          { name: 'Bob', grade: 12, age: 22 },
-          { name: 'Charlie', grade: 18, age: 19 },
-        ]);
-      });
-    it('should sort students by grade descending', () => {
-      const students = [
-        { name: 'Alice', grade: 15, age: 20 },
-        { name: 'Bob', grade: 12, age: 22 },
-        { name: 'Charlie', grade: 18, age: 19 },
-      ];
-      const sorted = sortStudents(students, 'grade', 'desc');
-      expect(sorted).toEqual([
-        { name: 'Charlie', grade: 18, age: 19 },
-        { name: 'Alice', grade: 15, age: 20 },
-        { name: 'Bob', grade: 12, age: 22 },
-      ]);
-    });
+  it('should default to ascending order', () => {
+    const students = [
+      { name: 'Alice', grade: 15, age: 20 },
+      { name: 'Bob', grade: 12, age: 22 },
+      { name: 'Charlie', grade: 18, age: 19 },
+    ];
+    const sorted = sortStudents(students, 'grade');
+    expect(sorted).toEqual([
+      { name: 'Bob', grade: 12, age: 22 },
+      { name: 'Alice', grade: 15, age: 20 },
+      { name: 'Charlie', grade: 18, age: 19 },
+    ]);
+  });
+  it('should not modify the original array', () => {
+    const students = [
+      { name: 'Alice', grade: 15, age: 20 },
+      { name: 'Bob', grade: 12, age: 22 },
+      { name: 'Charlie', grade: 18, age: 19 },
+    ];
+    const copy = [...students.map(s => ({ ...s }))];
+    sortStudents(students, 'grade', 'asc');
+    expect(students).toEqual(copy);
+  });
+  it('should return empty array for empty input', () => {
+    expect(sortStudents([], 'grade', 'asc')).toEqual([]);
+  });
+  it('should return empty array for null input', () => {
+    expect(sortStudents(null, 'grade', 'asc')).toEqual([]);
+  });
+  it('should sort students by age ascending', () => {
+    const students = [
+      { name: 'Charlie', grade: 18, age: 19 },
+      { name: 'Bob', grade: 12, age: 22 },
+      { name: 'Alice', grade: 15, age: 20 },
+    ];
+    const sorted = sortStudents(students, 'age', 'asc');
+    expect(sorted).toEqual([
+      { name: 'Charlie', grade: 18, age: 19 },
+      { name: 'Alice', grade: 15, age: 20 },
+      { name: 'Bob', grade: 12, age: 22 },
+    ]);
+  });
+  it('should sort students by name ascending', () => {
+    const students = [
+      { name: 'Charlie', grade: 18, age: 19 },
+      { name: 'Bob', grade: 12, age: 22 },
+      { name: 'Alice', grade: 15, age: 20 },
+    ];
+    const sorted = sortStudents(students, 'name', 'asc');
+    expect(sorted).toEqual([
+      { name: 'Alice', grade: 15, age: 20 },
+      { name: 'Bob', grade: 12, age: 22 },
+      { name: 'Charlie', grade: 18, age: 19 },
+    ]);
+  });
+  it('should sort students by grade descending', () => {
+    const students = [
+      { name: 'Alice', grade: 15, age: 20 },
+      { name: 'Bob', grade: 12, age: 22 },
+      { name: 'Charlie', grade: 18, age: 19 },
+    ];
+    const sorted = sortStudents(students, 'grade', 'desc');
+    expect(sorted).toEqual([
+      { name: 'Charlie', grade: 18, age: 19 },
+      { name: 'Alice', grade: 15, age: 20 },
+      { name: 'Bob', grade: 12, age: 22 },
+    ]);
+  });
   it('should sort students by grade ascending', () => {
     const students = [
       { name: 'Alice', grade: 15, age: 20 },
@@ -519,7 +515,7 @@ describe('capitalize', () => {
 describe('calculateAverage', () => {
   it('should handle array with NaN or non-numbers', () => {
     expect(calculateAverage([10, NaN, 20])).toBeCloseTo(15);
-    expect(calculateAverage(["a", 5, 15])).toBeCloseTo(10);
+    expect(calculateAverage(['a', 5, 15])).toBeCloseTo(10);
   });
   it('should calculate average of numbers', () => {
     expect(calculateAverage([10, 12, 14])).toBe(12);
@@ -533,14 +529,14 @@ describe('calculateAverage', () => {
 });
 
 describe('slugify', () => {
-    it('should handle special characters and multiple dashes', () => {
-      expect(slugify('Hello---World!!!')).toBe('hello-world');
-      expect(slugify('  --Hello  World--  ')).toBe('hello-world');
-    });
+  it('should handle special characters and multiple dashes', () => {
+    expect(slugify('Hello---World!!!')).toBe('hello-world');
+    expect(slugify('  --Hello  World--  ')).toBe('hello-world');
+  });
   it('should slugify text', () => {
     expect(slugify('Hello World')).toBe('hello-world');
     expect(slugify(' Spaces Everywhere ')).toBe('spaces-everywhere');
-    expect(slugify("C'est l'ete !")).toBe('cest-lete');
+    expect(slugify('C\'est l\'ete !')).toBe('cest-lete');
   });
   it('should return empty string for empty input', () => {
     expect(slugify('')).toBe('');
@@ -548,43 +544,43 @@ describe('slugify', () => {
 });
 
 describe('clamp', () => {
-    it('should handle NaN and undefined', () => {
-      expect(clamp(NaN, 0, 10)).toBe(0);
-      expect(clamp(undefined, 0, 10)).toBe(0);
-    });
-    it('should handle unknown sortBy', () => {
-      const students = [
-        { name: 'Alice', grade: 15, age: 20 },
-        { name: 'Bob', grade: 12, age: 22 },
-      ];
-      expect(sortStudents(students, 'unknown')).toEqual(students);
-    });
-    it('should handle undefined students', () => {
-      expect(sortStudents(undefined, 'grade')).toEqual([]);
-    });
-    it('should handle undefined and empty string', () => {
-      expect(parsePrice(undefined)).toBeNull();
-      expect(parsePrice('')).toBeNull();
-    });
-    it('should handle string with spaces', () => {
-      expect(parsePrice('   15,50   ')).toBe(15.5);
-    });
-    it('should handle undefined array', () => {
-      expect(groupBy(undefined, 'role')).toEqual({});
-    });
-    it('should handle undefined key', () => {
-      const arr = [ { name: 'Alice', role: 'dev' } ];
-      expect(groupBy(arr, undefined)).toEqual({});
-    });
-    it('should throw for negative price', () => {
-      expect(() => calculateDiscount(-10, [{ type: 'fixed', value: 5 }])).toThrow();
-    });
-    it('should throw for missing rule fields', () => {
-      expect(() => calculateDiscount(100, [{ type: 'buyXgetY', buy: 3 }])).toThrow();
-    });
-    it('should handle empty rules array', () => {
-      expect(calculateDiscount(100, [])).toBe(100);
-    });
+  it('should handle NaN and undefined', () => {
+    expect(clamp(NaN, 0, 10)).toBe(0);
+    expect(clamp(undefined, 0, 10)).toBe(0);
+  });
+  it('should handle unknown sortBy', () => {
+    const students = [
+      { name: 'Alice', grade: 15, age: 20 },
+      { name: 'Bob', grade: 12, age: 22 },
+    ];
+    expect(sortStudents(students, 'unknown')).toEqual(students);
+  });
+  it('should handle undefined students', () => {
+    expect(sortStudents(undefined, 'grade')).toEqual([]);
+  });
+  it('should handle undefined and empty string', () => {
+    expect(parsePrice(undefined)).toBeNull();
+    expect(parsePrice('')).toBeNull();
+  });
+  it('should handle string with spaces', () => {
+    expect(parsePrice('   15,50   ')).toBe(15.5);
+  });
+  it('should handle undefined array', () => {
+    expect(groupBy(undefined, 'role')).toEqual({});
+  });
+  it('should handle undefined key', () => {
+    const arr = [ { name: 'Alice', role: 'dev' } ];
+    expect(groupBy(arr, undefined)).toEqual({});
+  });
+  it('should throw for negative price', () => {
+    expect(() => calculateDiscount(-10, [{ type: 'fixed', value: 5 }])).toThrow();
+  });
+  it('should throw for missing rule fields', () => {
+    expect(() => calculateDiscount(100, [{ type: 'buyXgetY', buy: 3 }])).toThrow();
+  });
+  it('should handle empty rules array', () => {
+    expect(calculateDiscount(100, [])).toBe(100);
+  });
   it('should clamp value between min and max', () => {
     expect(clamp(5, 0, 10)).toBe(5);
     expect(clamp(-5, 0, 10)).toBe(0);

@@ -1,3 +1,4 @@
+/* global Request, Buffer */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
 import app from '../src/app.js';
@@ -27,99 +28,99 @@ function makeOrderBody(overrides = {}) {
 }
 
 describe('API Integration', () => {
-    // --- Cas supplémentaires ---
-    it('POST /orders/simulate - poids élevé (frais)', async () => {
-      const address = server.address();
-      const url = `http://localhost:${address.port}`;
-      const res = await request(url)
-        .post('/orders/simulate')
-        .send(makeOrderBody({ weight: 10 }));
-      expect(res.status).toBe(200);
-      expect(res.body.deliveryFee).toBeGreaterThan(0);
-    });
+  // --- Cas supplémentaires ---
+  it('POST /orders/simulate - poids élevé (frais)', async () => {
+    const address = server.address();
+    const url = `http://localhost:${address.port}`;
+    const res = await request(url)
+      .post('/orders/simulate')
+      .send(makeOrderBody({ weight: 10 }));
+    expect(res.status).toBe(200);
+    expect(res.body.deliveryFee).toBeGreaterThan(0);
+  });
 
-    it('POST /orders - promo non cumulable', async () => {
-      const address = server.address();
-      const url = `http://localhost:${address.port}`;
-      const res = await request(url)
-        .post('/orders')
-        .send(makeOrderBody({ promoCode: 'PROMO20' }));
-      expect(res.status).toBe(201);
-      expect(res.body.discount).toBeGreaterThan(0);
-    });
+  it('POST /orders - promo non cumulable', async () => {
+    const address = server.address();
+    const url = `http://localhost:${address.port}`;
+    const res = await request(url)
+      .post('/orders')
+      .send(makeOrderBody({ promoCode: 'PROMO20' }));
+    expect(res.status).toBe(201);
+    expect(res.body.discount).toBeGreaterThan(0);
+  });
 
-    it('POST /orders - promo inconnu', async () => {
-      const address = server.address();
-      const url = `http://localhost:${address.port}`;
-      const res = await request(url)
-        .post('/orders')
-        .send(makeOrderBody({ promoCode: 'INCONNU' }));
-      expect(res.status).toBe(400);
-      expect(res.body.error).toMatch(/promo/i);
-    });
+  it('POST /orders - promo inconnu', async () => {
+    const address = server.address();
+    const url = `http://localhost:${address.port}`;
+    const res = await request(url)
+      .post('/orders')
+      .send(makeOrderBody({ promoCode: 'INCONNU' }));
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/promo/i);
+  });
 
-    it('POST /orders - hors zone', async () => {
-      const address = server.address();
-      const url = `http://localhost:${address.port}`;
-      const res = await request(url)
-        .post('/orders')
-        .send(makeOrderBody({ distance: 20 }));
-      expect(res.status).toBe(400);
-      expect(res.body.error).toMatch(/delivery/i);
-    });
+  it('POST /orders - hors zone', async () => {
+    const address = server.address();
+    const url = `http://localhost:${address.port}`;
+    const res = await request(url)
+      .post('/orders')
+      .send(makeOrderBody({ distance: 20 }));
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/delivery/i);
+  });
 
-    it('POST /orders - fermé', async () => {
-      const address = server.address();
-      const url = `http://localhost:${address.port}`;
-      const res = await request(url)
-        .post('/orders')
-        .send(makeOrderBody({ hour: 2 }));
-      expect(res.status).toBe(400);
-      expect(res.body.error).toMatch(/closed/i);
-    });
+  it('POST /orders - fermé', async () => {
+    const address = server.address();
+    const url = `http://localhost:${address.port}`;
+    const res = await request(url)
+      .post('/orders')
+      .send(makeOrderBody({ hour: 2 }));
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/closed/i);
+  });
 
-    it('POST /orders - mauvais type de données', async () => {
-      const address = server.address();
-      const url = `http://localhost:${address.port}`;
-      const res = await request(url)
-        .post('/orders')
-        .send({ items: 'not-an-array', distance: 3, weight: 1, hour: 12, dayOfWeek: 2 });
-      expect(res.status).toBe(400);
-    });
+  it('POST /orders - mauvais type de données', async () => {
+    const address = server.address();
+    const url = `http://localhost:${address.port}`;
+    const res = await request(url)
+      .post('/orders')
+      .send({ items: 'not-an-array', distance: 3, weight: 1, hour: 12, dayOfWeek: 2 });
+    expect(res.status).toBe(400);
+  });
 
-    it('GET /orders/:id - id non numérique', async () => {
-      const address = server.address();
-      const url = `http://localhost:${address.port}`;
-      const get = await request(url).get('/orders/abc');
-      expect(get.status).toBe(404);
-    });
+  it('GET /orders/:id - id non numérique', async () => {
+    const address = server.address();
+    const url = `http://localhost:${address.port}`;
+    const get = await request(url).get('/orders/abc');
+    expect(get.status).toBe(404);
+  });
 
-    it('POST /promo/validate - mauvais type de subtotal', async () => {
-      const address = server.address();
-      const url = `http://localhost:${address.port}`;
-      const res = await request(url)
-        .post('/promo/validate')
-        .send({ code: 'PROMO20', subtotal: 'not-a-number' });
-      expect(res.status).toBe(400);
-    });
+  it('POST /promo/validate - mauvais type de subtotal', async () => {
+    const address = server.address();
+    const url = `http://localhost:${address.port}`;
+    const res = await request(url)
+      .post('/promo/validate')
+      .send({ code: 'PROMO20', subtotal: 'not-a-number' });
+    expect(res.status).toBe(400);
+  });
 
-    it('POST /orders/simulate - promo sous le minimum', async () => {
-      const address = server.address();
-      const url = `http://localhost:${address.port}`;
-      const res = await request(url)
-        .post('/orders/simulate')
-        .send(makeOrderBody({ promoCode: 'PROMO20', items: [{ name: 'Soda', price: 3, quantity: 1 }] }));
-      expect(res.status).toBe(400);
-      expect(res.body.error).toMatch(/promo/i);
-    });
+  it('POST /orders/simulate - promo sous le minimum', async () => {
+    const address = server.address();
+    const url = `http://localhost:${address.port}`;
+    const res = await request(url)
+      .post('/orders/simulate')
+      .send(makeOrderBody({ promoCode: 'PROMO20', items: [{ name: 'Soda', price: 3, quantity: 1 }] }));
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/promo/i);
+  });
 
-    it('GET /ping - pong', async () => {
-      const address = server.address();
-      const url = `http://localhost:${address.port}`;
-      const res = await request(url).get('/ping');
-      expect(res.status).toBe(200);
-      expect(res.body.message).toBe('pong');
-    });
+  it('GET /ping - pong', async () => {
+    const address = server.address();
+    const url = `http://localhost:${address.port}`;
+    const res = await request(url).get('/ping');
+    expect(res.status).toBe(200);
+    expect(res.body.message).toBe('pong');
+  });
   let server;
   beforeEach(() => {
     if (Array.isArray(app.orders)) {

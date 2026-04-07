@@ -3,10 +3,10 @@ import { describe, it, expect } from 'vitest';
 import { isValidEmail, isValidPassword, isValidAge } from '../src/validators.js';
 
 describe('isValidEmail', () => {
-    it('should handle undefined and numbers', () => {
-      expect(isValidEmail(undefined)).toBe(false);
-      expect(isValidEmail(123)).toBe(false);
-    });
+  it('should handle undefined and numbers', () => {
+    expect(isValidEmail(undefined)).toBe(false);
+    expect(isValidEmail(123)).toBe(false);
+  });
   it('should validate correct emails', () => {
     expect(isValidEmail('user@example.com')).toBe(true);
     expect(isValidEmail('user.name+tag@domain.co')).toBe(true);
@@ -21,17 +21,17 @@ describe('isValidEmail', () => {
 });
 
 describe('isValidPassword', () => {
-    it('should handle passwords with only special chars', () => {
-      const result = isValidPassword('!@#$%^&*');
-      expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Le mot de passe doit contenir au moins une majuscule');
-      expect(result.errors).toContain('Le mot de passe doit contenir au moins une minuscule');
-      expect(result.errors).toContain('Le mot de passe doit contenir au moins un chiffre');
-    });
-    it('should handle passwords with unicode', () => {
-      const result = isValidPassword('Pässw0rd!');
-      expect(result.valid).toBe(true);
-    });
+  it('should handle passwords with only special chars', () => {
+    const result = isValidPassword('!@#$%^&*');
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Le mot de passe doit contenir au moins une majuscule');
+    expect(result.errors).toContain('Le mot de passe doit contenir au moins une minuscule');
+    expect(result.errors).toContain('Le mot de passe doit contenir au moins un chiffre');
+  });
+  it('should handle passwords with unicode', () => {
+    const result = isValidPassword('Pässw0rd!');
+    expect(result.valid).toBe(true);
+  });
   it('should validate a strong password', () => {
     expect(isValidPassword('Passw0rd!')).toEqual({ valid: true, errors: [] });
   });
@@ -70,10 +70,10 @@ describe('isValidPassword', () => {
 });
 
 describe('isValidAge', () => {
-    it('should handle undefined and string', () => {
-      expect(isValidAge(undefined)).toBe(false);
-      expect(isValidAge('25')).toBe(false);
-    });
+  it('should handle undefined and string', () => {
+    expect(isValidAge(undefined)).toBe(false);
+    expect(isValidAge('25')).toBe(false);
+  });
   it('should validate correct ages', () => {
     expect(isValidAge(25)).toBe(true);
     expect(isValidAge(0)).toBe(true);
@@ -83,7 +83,7 @@ describe('isValidAge', () => {
     expect(isValidAge(-1)).toBe(false);
     expect(isValidAge(151)).toBe(false);
     expect(isValidAge(25.5)).toBe(false);
-    expect(isValidAge("25")).toBe(false);
+    expect(isValidAge('25')).toBe(false);
     expect(isValidAge(null)).toBe(false);
   });
 });
